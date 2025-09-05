@@ -187,6 +187,41 @@ private void ClearForm()
 
     <hr>
 
+    <h3 id="validation">3. Validation – Checking User Input</h3>
+    <p>Validation does not run on its own. It only runs when the Submit button event handler (`btnSubmit_Click`) calls it.</p>
+
+    <h4>3.1 Name Validation – `ValidateName`</h4>
+    <p>This helper method ensures the name contains only valid characters. It uses a regular expression for a robust check.</p>
+
+    <h4>3.2 Account Number Validation with `TryParse`</h4>
+    <p>This section is crucial for handling user input that must be a number.</p>
+    <div class="code-container">
+        <button class="copy-btn">Copy Code</button>
+        <pre><code class="language-csharp">if (!int.TryParse(txtAccountNumber.Text, out _))
+{
+    MessageBox.Show("Account Number must be a whole number.");
+    txtAccountNumber.Focus();
+    return;
+}</code></pre>
+    </div>
+    <p><strong>Explanation:</strong> `int.TryParse` is a safe way to try converting the user's input (a string) into a number. It's a built-in C# method that returns `true` if the conversion worked and `false` if it failed. The `!` operator in front of it inverts the result, so the `if` statement's code only runs if the conversion **failed**.</p>
+    
+    <h4>3.3 Amount Validation with `TryParse` and `decimal`</h4>
+    <p>Similar to the account number, this section validates the amount, ensuring it's a positive number using the precise `decimal` type.</p>
+    
+    <div class="code-container">
+        <button class="copy-btn">Copy Code</button>
+        <pre><code class="language-csharp">if (!decimal.TryParse(txtAmount.Text, out decimal depositAmount) || depositAmount <= 0)
+{
+    MessageBox.Show("Amount must be a positive numeric value.");
+    txtAmount.Focus();
+    return;
+}</code></pre>
+    </div>
+    <p><strong>Explanation:</strong> This code uses `decimal` for accuracy with currency. It checks if the number is valid and if it's also a positive value (`> 0`).</p>
+
+    <hr>
+
     <h2 id="bonus-tasks">Bonus Tasks: Going Above and Beyond!</h2>
     <p>Once you’ve completed the core lab, try tackling one or more of these bonus tasks. They will challenge you to apply more advanced programming concepts and further improve the app's usability.</p>
     <ul>
