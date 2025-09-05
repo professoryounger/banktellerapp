@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Teller App: HCI & Code Deep Dive</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        h1 {
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .code-container {
+            position: relative;
+            background: #23272e;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        .copy-btn:hover {
+            background: #2980b9;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        pre {
+            margin: 0;
+        }
+        .note {
+            background: #f1f1f1;
+            border-left: 4px solid #3498db;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 4px;
+        }
+        ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>COMP 340 – Lab 1: Bank Teller App</h1>
+    <h2>HCI & Code Deep Dive</h2>
+
+    <p>This page accompanies the lecture on Human-Computer Interaction and presents the final, polished code for the bank teller application. Each section includes a code block you can copy with a single click.</p>
+
+    <hr>
+
+    <h3 id="layout-design">1. App Layout and Design (Form1.Designer.cs)</h3>
+    <p>This file is the "blueprint" of the application. It defines the layout of the user interface—all the visual elements like labels, text boxes, and buttons. You don’t need to edit this file directly, but it's important to understand how it's structured.</p>
+    <div class="code-container">
+        <button class="copy-btn">Copy Code</button>
+        <pre><code class="language-csharp">using System.Windows.Forms;
+using System.Drawing;
+
+namespace BankTellerApp
+{
+    partial class Form1
+    {
+        // ... (truncated for brevity)
+        private System.Windows.Forms.Label lblFirstName;
+        private System.Windows.Forms.Label lblLastName;
+        private System.Windows.Forms.Label lblAccountNumber;
+        private System.Windows.Forms.Label lblAmount;
+        private System.Windows.Forms.TextBox txtFirstName;
+        private System.Windows.Forms.TextBox txtLastName;
+        private System.Windows.Forms.TextBox txtAccountNumber;
+        private System.Windows.Forms.TextBox txtAmount;
+        private System.Windows.Forms.Button btnSubmit;
+        private System.Windows.Forms.Button btnReset;
+    }
+}</code></pre>
+    </div>
+
+    <hr>
+
+    <h3 id="logic">2. Core Logic (Form1.cs)</h3>
+    <p>This is where all the action happens. The code in `Form1.cs` responds to user clicks, validates input, and provides feedback.</p>
+    
+    <h4>Code Deep Dive: The Submit Button</h4>
+    <p>The code below is what runs when a user clicks the **Submit** button. It checks each field one by one and shows an alert if there's an error.</p>
+    <div class="code-container">
+        <button class="copy-btn">Copy Code</button>
+        <pre><code class="language-csharp">// This method runs when the user clicks the Submit button.
+private void btnSubmit_Click(object sender, EventArgs e)
+{
+    ClearErrors();
+
+    if (string.IsNullOrWhiteSpace(txtFirstName.Text) || !ValidateName(txtFirstName.Text))
+    {
+        MessageBox.Show("First Name must contain only alphabetic characters.", "Invalid Entry", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        txtFirstName.Focus();
+        return;
+    }
+
+    if (string.IsNullOrWhiteSpace(txtLastName.Text) || !ValidateName(txtLastName.Text))
+    {
+        MessageBox.Show("Last Name must contain only alphabetic characters.", "Invalid Entry", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        txtLastName.Focus();
+        return;
+    }
+
+    if (!long.TryParse(txtAccountNumber.Text, out _))
+    {
+        MessageBox.Show("Account Number must be a whole number.", "Invalid Entry", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        txtAccountNumber.Focus();
+        return;
+    }
+
+    if (!decimal.TryParse(txtAmount.Text, out decimal depositAmount) || depositAmount <= 0)
+    {
+        MessageBox.Show("Amount must be a positive numeric value.", "Invalid Entry", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        txtAmount.Focus();
+        return;
+    }
+    
+    string confirmationMessage = $"Deposit of ${depositAmount:N2} to account {txtAccountNumber.Text} for {txtFirstName.Text} {txtLastName.Text} has been submitted.";
+    MessageBox.Show(confirmationMessage, "Submission Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    ClearForm();
+}</code></pre>
+    </div>
+
+    <h4>Helper Methods</h4>
+    <p>The `btnSubmit_Click` method calls other helper methods to keep the code clean and organized. The `ClearForm` method is also used by the **Reset** button.</p>
+    <div class="code-container">
+        <button class="copy-btn">Copy Code</button>
+        <pre><code class="language-csharp">private bool ValidateName(string name)
+{
+    // The Regex is a more robust way to check for names.
+    return Regex.IsMatch(name, @"^[a-zA-Z\s'-]+$");
+}
+
+private void ClearErrors()
+{
+    // This method resets the colors of the labels and textboxes.
+    lblFirstName.ForeColor = System.Drawing.SystemColors.ControlText;
+    lblLastName.ForeColor = System.Drawing.SystemColors.ControlText;
+    lblAccountNumber.ForeColor = System.Drawing.SystemColors.ControlText;
+    lblAmount.ForeColor = System.Drawing.SystemColors.ControlText;
+
+    txtFirstName.BackColor = System.Drawing.SystemColors.Window;
+    txtLastName.BackColor = System.Drawing.SystemColors.Window;
+    txtAccountNumber.BackColor = System.Drawing.SystemColors.Window;
+    txtAmount.BackColor = System.Drawing.SystemColors.Window;
+}
+
+private void ClearForm()
+{
+    // Resets all the text boxes and returns focus to the first one.
+    txtFirstName.Clear();
+    txtLastName.Clear();
+    txtAccountNumber.Clear();
+    txtAmount.Clear();
+    txtFirstName.Focus();
+    ClearErrors();
+}</code></pre>
+    </div>
+
+    <hr>
+
+    <h2 id="bonus-tasks">Bonus Tasks: Going Above and Beyond!</h2>
+    <p>Once you’ve completed the core lab, try tackling one or more of these bonus tasks. They will challenge you to apply more advanced programming concepts and further improve the app's usability.</p>
+    <ul>
+        <li>
+            <h3>1. Transaction History</h3>
+            <p><strong>Task:</strong> Keep a running list of all deposits. Use a List to store a history of each transaction.</p>
+            <p><strong>Skills reinforced:</strong> Lists/collections, data structures.</p>
+            <p><strong>Extension idea:</strong> Save the transaction history to a file so it persists even after the app is closed.</p>
+        </li>
+        <li>
+            <h3>2. Interest Calculation</h3>
+            <p><strong>Task:</strong> Add a feature to calculate interest on the account balance. Add a new button or menu item to trigger the calculation.</p>
+            <p><strong>Skills reinforced:</strong> Math operations, conditional logic, and potentially the Timer component.</p>
+            <p><strong>Extension idea:</strong> Let the user choose between simple and compound interest.</p>
+        </li>
+        <li>
+            <h3>3. Account Types</h3>
+            <p><strong>Task:</strong> Add multiple account types like Checking and Savings. Use a dropdown menu to let the user select the account type.</p>
+            <p><strong>Skills reinforced:</strong> Object-oriented programming, inheritance, and polymorphism.</p>
+            <p><strong>Extension idea:</strong> Implement different rules for deposits or withdrawals based on the account type (e.g., a fee for withdrawing from savings).</p>
+        </li>
+        <li>
+            <h3>4. Improved Error Handling</h3>
+            <p><strong>Task:</strong> Improve the current validation by providing non-intrusive feedback. Use visual cues like changing the field's background color and showing a tooltip on hover instead of a pop-up message box.</p>
+            <p><strong>Skills reinforced:</strong> User feedback, visual design, and event handling.</p>
+            <p><strong>Extension idea:</strong> Pop up a warning dialog only for critical errors, not for every typo.</p>
+        </li>
+        <li>
+            <h3>5. Graphical Summary</h3>
+            <p><strong>Task:</strong> Add a chart to visualize the account balance over time or show a breakdown of transactions. You can use chart controls available in Windows Forms.</p>
+            <p><strong>Skills reinforced:</strong> Data visualization, using specialized UI components.</p>
+            <p><strong>Extension idea:</strong> Create a line graph to show the balance trend or a pie chart to visualize different transaction categories.</p>
+        </li>
+    </ul>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const codeBlocks = document.querySelectorAll('.code-container');
+            codeBlocks.forEach(container => {
+                const button = container.querySelector('.copy-btn');
+                const code = container.querySelector('pre code');
+                
+                button.addEventListener('click', () => {
+                    navigator.clipboard.writeText(code.innerText).then(() => {
+                        button.innerText = 'Copied!';
+                        setTimeout(() => {
+                            button.innerText = 'Copy Code';
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Failed to copy text: ', err);
+                        button.innerText = 'Error';
+                    });
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
